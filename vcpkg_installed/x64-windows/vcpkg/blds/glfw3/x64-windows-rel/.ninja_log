@@ -1,0 +1,26 @@
+# ninja log v5
+114	1351	7410032706381179	src/CMakeFiles/glfw.dir/window.c.obj	8bc2e4392d72835
+54	1375	7410032707012951	src/CMakeFiles/glfw.dir/monitor.c.obj	f131c8fb99a56531
+153	1457	7410032707782975	src/CMakeFiles/glfw.dir/osmesa_context.c.obj	8fa6f06600667534
+13	1594	7410032708643038	src/CMakeFiles/glfw.dir/context.c.obj	8c86dae452e9797f
+127	1601	7410032709223073	src/CMakeFiles/glfw.dir/egl_context.c.obj	19f37138a8c9832d
+75	1609	7410032708933064	src/CMakeFiles/glfw.dir/platform.c.obj	bc6f87109b85279b
+25	1641	7410032709625184	src/CMakeFiles/glfw.dir/init.c.obj	f0165ee14a1970d0
+101	1650	7410032709695182	src/CMakeFiles/glfw.dir/vulkan.c.obj	a488890e4ae5c49b
+38	1769	7410032710925080	src/CMakeFiles/glfw.dir/input.c.obj	11cb59d4cd21066
+1376	2085	7410032714115332	src/CMakeFiles/glfw.dir/null_monitor.c.obj	790c148298bc0d73
+1594	2190	7410032715105391	src/CMakeFiles/glfw.dir/null_joystick.c.obj	bfe46ce2a6ad7299
+1458	2199	7410032715235401	src/CMakeFiles/glfw.dir/null_window.c.obj	80126725b47ea108
+1602	2227	7410032715415407	src/CMakeFiles/glfw.dir/win32_module.c.obj	7e4c018fa45de90f
+1361	2304	7410032716295482	src/CMakeFiles/glfw.dir/null_init.c.obj	e5559f2d69eec77b
+1642	2416	7410032717455572	src/CMakeFiles/glfw.dir/win32_thread.c.obj	1851c0899b663e1c
+1650	2467	7410032717945599	src/CMakeFiles/glfw.dir/win32_init.c.obj	7b77321e09166dc8
+1610	2484	7410032718085610	src/CMakeFiles/glfw.dir/win32_time.c.obj	fed12ace22952607
+1769	2626	7410032719525710	src/CMakeFiles/glfw.dir/win32_joystick.c.obj	c831089330736f68
+2227	2627	7410032719485710	src/CMakeFiles/glfw.dir/glfw.rc.res	3cac3af6612b7749
+2085	2873	7410032722017702	src/CMakeFiles/glfw.dir/win32_monitor.c.obj	791f89dcc43e8507
+2199	2944	7410032722749817	src/CMakeFiles/glfw.dir/wgl_context.c.obj	50ae7c087b4a3649
+2190	3006	7410032723369856	src/CMakeFiles/glfw.dir/win32_window.c.obj	ec0087bc0529c445
+3007	3220	7410032725171474	src/glfw3.dll	1ed571f125b5236a
+3007	3220	7410032725171474	src/glfw3dll.lib	1ed571f125b5236a
+3221	3527	0	CMakeFiles/install.util	f9d22a7b2dae500a

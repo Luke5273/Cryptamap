@@ -1,0 +1,14 @@
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/lib/imgui.lib
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/include/imgui.h
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/include/imconfig.h
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/include/imgui_internal.h
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/include/imstb_textedit.h
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/include/imstb_rectpack.h
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/include/imstb_truetype.h
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/include/imgui_stdlib.h
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/include/imgui_impl_glfw.h
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/include/imgui_impl_opengl3.h
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/include/imgui_impl_opengl3_loader.h
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/share/imgui/imgui-config.cmake
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/share/imgui/imgui-targets.cmake
+C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/x64-windows/vcpkg/pkgs/imgui_x64-windows/share/imgui/imgui-targets-release.cmake
