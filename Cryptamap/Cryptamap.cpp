@@ -59,10 +59,10 @@ int main(int, char**)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
 #else
     // GL 3.0 + GLSL 130
-    const char* glsl_version = "#version 130";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+    const char* glsl_version = "#version 430";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);    // 3.2+ only
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
@@ -130,6 +130,103 @@ int main(int, char**)
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    float verts[] = {
+        // positions         // colors           
+        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
+        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
+       -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f      // top left 
+    };
+    uint32_t indices[] = {
+        0, 1, 2,
+        0, 2, 3
+    };
+
+    uint32_t VBO;
+    uint32_t VAO;
+    uint32_t EBO;
+
+    glGenBuffers(1, &VBO);
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // aPos
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // aColor
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    //compile shaders
+    int success;
+    char infoLog[512];
+
+    const char* vertexSource = "#version 430 core\n"
+                                "layout (location = 0) in vec3 aPos;\n"
+                                "layout (location = 1) in vec3 aColor;\n"
+                                "\n"
+                                "uniform float time;\n"
+                                "\n"
+                                "out vec2 TexCoord;\n"
+                                "void main() \n"
+                                "{\n"
+                                "    vec2 pre = aPos.xy;\n"
+                                "    mat2 transform = mat2(\n"
+                                "        cos(time),-sin(time),\n"
+                                "        sin(time), cos(time)\n"
+                                "    );\n"
+                                "    vec2 post = transform * pre;\n"
+                                "    gl_Position = vec4(post.xy, aPos.z, 1.0);\n" 
+                                "}";
+    const char* fragmentSource = "#version 430 core\n"
+                                  "out vec4 FragColor;\n"
+                                  "\n"
+                                  "void main()\n"
+                                  "{\n"
+                                  "    FragColor = vec4(1., 1., 0., 1.);\n"
+                                  "}";
+
+    GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex, 1, &vertexSource, NULL);
+    glCompileShader(vertex);
+    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+    if(!success) 
+    {
+        glGetShaderInfoLog(vertex, sizeof(infoLog), NULL, infoLog);
+        std::cout << infoLog << std::endl;
+    }
+
+    GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment, 1, &fragmentSource, NULL);
+    glCompileShader(fragment);
+    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        glGetShaderInfoLog(vertex, sizeof(infoLog), NULL, infoLog);
+        std::cout << infoLog << std::endl;
+    }
+
+    GLuint shader = glCreateProgram();
+    glAttachShader(shader, vertex);
+    glAttachShader(shader, fragment);
+    glLinkProgram(shader);
+    glGetProgramiv(shader, GL_LINK_STATUS, &success);
+    if(success)
+    {
+        glGetProgramInfoLog(shader, sizeof(infoLog), NULL, infoLog);
+        std::cout << infoLog << std::endl;
+    }
+
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+
     // Main loop
 #ifdef __EMSCRIPTEN__
     // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
@@ -196,6 +293,13 @@ int main(int, char**)
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(shader);
+        glUniform1f(glGetUniformLocation(shader, "time"), (float)glfwGetTime());
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update and Render additional Platform Windows
@@ -208,6 +312,7 @@ int main(int, char**)
             ImGui::RenderPlatformWindowsDefault();
             glfwMakeContextCurrent(backup_current_context);
         }
+        
 
         glfwSwapBuffers(window);
     }
