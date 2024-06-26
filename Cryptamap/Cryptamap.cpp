@@ -1,40 +1,37 @@
-// Dear ImGui: standalone example application for GLFW + OpenGL 3, using programmable pipeline
-// (GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context creation, etc.)
-
-// Learn about Dear ImGui:
-// - FAQ                  https://dearimgui.com/faq
-// - Getting Started      https://dearimgui.com/getting-started
-// - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
-// - Introduction, links and more at the top of imgui.cpp
-
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
 #include <iostream>
 #define GL_SILENCE_DEPRECATION
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <GLES2/gl2.h>
-#endif
 #include <glad/glad.h>
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
-
-// [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
-// To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
-// Your own project should not be affected, as you are likely to link with a newer binary of GLFW that is adequate for your version of Visual Studio.
-#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
-#pragma comment(lib, "legacy_stdio_definitions")
-#endif
-
-// This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
-#ifdef __EMSCRIPTEN__
-#include "../libs/emscripten/emscripten_mainloop_stub.h"
-#endif
+#include <glm/glm.hpp>
 
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
+
+float scale = 1;
+glm::vec2 translate = glm::vec2(0,0);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
+    {
+        translate -= glm::vec2(0, yoffset / 12);
+        return;
+    }
+    else if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
+    {
+        translate += glm::vec2(yoffset / 12, 0);
+        return;
+    }
+
+    float prospect = scale + yoffset/12;
+    scale = prospect >= 0 ? prospect : scale;
+}
+
 
 // Main code
 int main(int, char**)
@@ -43,35 +40,16 @@ int main(int, char**)
     if (!glfwInit())
         return 1;
 
-    // Decide GL+GLSL versions
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-    // GL ES 2.0 + GLSL 100
-    const char* glsl_version = "#version 100";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-#elif defined(__APPLE__)
-    // GL 3.2 + GLSL 150
-    const char* glsl_version = "#version 150";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-#else
-    // GL 3.0 + GLSL 130
     const char* glsl_version = "#version 430";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);    // 3.2+ only
-    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
-#endif
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // Create window with graphics context
     GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Enable vsync
+    glfwSwapInterval(1); 
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize OpenGL context" << std::endl;
@@ -103,39 +81,28 @@ int main(int, char**)
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-#ifdef __EMSCRIPTEN__
-    ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback("#canvas");
-#endif
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return a nullptr. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
-    // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the "fonts/" folder. See Makefile.emscripten for details.
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != nullptr);
-
     // Our state
-    bool show_demo_window = true;
-    bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    int32_t wHeight, wWidth; //window height and width
+    glfwGetWindowSize(window, &wWidth, &wHeight);
+
+    int32_t qHeight, qWidth; //quad height and width
+    qHeight = 480;
+    qWidth = 640;
+
+    float kx, ky;
+    kx = (float)qWidth / wWidth;
+    ky = (float)qHeight / qWidth;
+
     float verts[] = {
-        // positions         // colors           
-        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
-        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
-       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
-       -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f      // top left 
+        // positions               // colors           
+        0.5f*kx,  0.5f*ky, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
+        0.5f*kx, -0.5f*ky, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
+       -0.5f*kx, -0.5f*ky, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
+       -0.5f*kx,  0.5f*ky, 0.0f,   1.0f, 1.0f, 0.0f      // top left 
     };
     uint32_t indices[] = {
         0, 1, 2,
@@ -171,26 +138,29 @@ int main(int, char**)
     const char* vertexSource = "#version 430 core\n"
                                 "layout (location = 0) in vec3 aPos;\n"
                                 "layout (location = 1) in vec3 aColor;\n"
+                                "out vec3 col;\n"
                                 "\n"
-                                "uniform float time;\n"
+                                "uniform float scale;\n"
+                                "uniform vec2 translate;\n"
                                 "\n"
-                                "out vec2 TexCoord;\n"
                                 "void main() \n"
                                 "{\n"
                                 "    vec2 pre = aPos.xy;\n"
                                 "    mat2 transform = mat2(\n"
-                                "        cos(time),-sin(time),\n"
-                                "        sin(time), cos(time)\n"
+                                "        scale, 0,\n"
+                                "        0,     scale\n"
                                 "    );\n"
                                 "    vec2 post = transform * pre;\n"
-                                "    gl_Position = vec4(post.xy, aPos.z, 1.0);\n" 
+                                "    gl_Position = vec4(post.xy + translate, aPos.z, 1.0);\n" 
+                                "    col = aColor;\n" 
                                 "}";
     const char* fragmentSource = "#version 430 core\n"
                                   "out vec4 FragColor;\n"
+                                  "in vec3 col;\n"
                                   "\n"
                                   "void main()\n"
                                   "{\n"
-                                  "    FragColor = vec4(1., 1., 0., 1.);\n"
+                                  "    FragColor = vec4(col, 1.);\n"
                                   "}";
 
     GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
@@ -227,15 +197,10 @@ int main(int, char**)
     glDeleteShader(vertex);
     glDeleteShader(fragment);
 
+    glfwSetScrollCallback(window, scroll_callback);
+
     // Main loop
-#ifdef __EMSCRIPTEN__
-    // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
-    // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
-    io.IniFilename = nullptr;
-    EMSCRIPTEN_MAINLOOP_BEGIN
-#else
-    while (!glfwWindowShouldClose(window))
-#endif
+    while(!glfwWindowShouldClose(window))
     {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -249,42 +214,20 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
+        //ImGui::ShowDemoWindow();
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-        {
-            static float f = 0.0f;
-            static int counter = 0;
+        
+        ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+          
+        ImGui::SliderFloat("scale", &scale, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+        ImGui::SliderFloat2("pos", &translate.x, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-            ImGui::End();
-        }
-
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
-        }
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::End();
+        
 
         // Rendering
         ImGui::Render();
@@ -295,7 +238,9 @@ int main(int, char**)
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shader);
-        glUniform1f(glGetUniformLocation(shader, "time"), (float)glfwGetTime());
+
+        glUniform1f(glGetUniformLocation(shader, "scale"), scale);
+        glUniform2f(glGetUniformLocation(shader, "translate"), translate.x, translate.y);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -316,9 +261,6 @@ int main(int, char**)
 
         glfwSwapBuffers(window);
     }
-#ifdef __EMSCRIPTEN__
-    EMSCRIPTEN_MAINLOOP_END;
-#endif
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
