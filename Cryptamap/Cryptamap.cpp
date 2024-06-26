@@ -45,7 +45,7 @@ int main(int, char**)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1920, 1080, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
@@ -89,20 +89,20 @@ int main(int, char**)
     int32_t wHeight, wWidth; //window height and width
     glfwGetWindowSize(window, &wWidth, &wHeight);
 
-    int32_t qHeight, qWidth; //quad height and width
-    qHeight = 480;
-    qWidth = 640;
+    float qHeight, qWidth; //quad height and width
+    qHeight = 1080*2;
+    qWidth = 1920*2;
 
     float kx, ky;
     kx = (float)qWidth / wWidth;
-    ky = (float)qHeight / qWidth;
+    ky = (float)qHeight / wHeight;
 
     float verts[] = {
         // positions               // colors           
-        0.5f*kx,  0.5f*ky, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
-        0.5f*kx, -0.5f*ky, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
-       -0.5f*kx, -0.5f*ky, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
-       -0.5f*kx,  0.5f*ky, 0.0f,   1.0f, 1.0f, 0.0f      // top left 
+        kx,  ky, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
+        kx, -ky, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
+       -kx, -ky, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
+       -kx,  ky, 0.0f,   1.0f, 1.0f, 0.0f      // top left 
     };
     uint32_t indices[] = {
         0, 1, 2,
