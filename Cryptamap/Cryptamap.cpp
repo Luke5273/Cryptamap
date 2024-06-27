@@ -8,6 +8,8 @@
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 #include <glm/glm.hpp>
 
+#include "Shader.hpp"
+
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -45,7 +47,7 @@ int main(int, char**)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(1920, 1080, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
@@ -84,14 +86,14 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Our state
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 clear_color = ImVec4(1.f, 1.f, 1.f, 1.00f);
 
     int32_t wHeight, wWidth; //window height and width
     glfwGetWindowSize(window, &wWidth, &wHeight);
 
     float qHeight, qWidth; //quad height and width
-    qHeight = 1080*2;
-    qWidth = 1920*2;
+    qHeight = 20*70;
+    qWidth = 30*70;
 
     float kx, ky;
     kx = (float)qWidth / wWidth;
@@ -131,11 +133,9 @@ int main(int, char**)
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    //compile shaders
-    int success;
-    char infoLog[512];
+    Shader shader = Shader("./test.vert", "./test.frag");
 
-    const char* vertexSource = "#version 430 core\n"
+    /*const char* vertexSource = "#version 430 core\n"
                                 "layout (location = 0) in vec3 aPos;\n"
                                 "layout (location = 1) in vec3 aColor;\n"
                                 "out vec3 col;\n"
@@ -195,7 +195,7 @@ int main(int, char**)
     }
 
     glDeleteShader(vertex);
-    glDeleteShader(fragment);
+    glDeleteShader(fragment);*/
 
     glfwSetScrollCallback(window, scroll_callback);
 
@@ -237,10 +237,9 @@ int main(int, char**)
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shader);
-
-        glUniform1f(glGetUniformLocation(shader, "scale"), scale);
-        glUniform2f(glGetUniformLocation(shader, "translate"), translate.x, translate.y);
+        shader.use();
+        glUniform1f(glGetUniformLocation(shader.ID, "scale"), scale);
+        glUniform2f(glGetUniformLocation(shader.ID, "translate"), translate.x, translate.y);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
