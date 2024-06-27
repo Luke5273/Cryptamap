@@ -1,8 +1,0 @@
-# ninja log v5
-11	1263	7410030543795173	include/glad/glad.h	882d3e8a4e404aea
-11	1263	7410030543795173	src/glad.c	882d3e8a4e404aea
-11	1263	7410030543795173	C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/vcpkg/blds/glad/x64-windows-rel/include/glad/glad.h	882d3e8a4e404aea
-11	1263	7410030543795173	C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/vcpkg/blds/glad/x64-windows-rel/src/glad.c	882d3e8a4e404aea
-1267	2496	7410030558312535	CMakeFiles/glad.dir/src/glad.c.obj	65e6fad06e43b9b3
-2503	2627	7410030559578358	glad.lib	6138927c68b2a48f
-2628	2847	0	CMakeFiles/install.util	d859ef819893df0a

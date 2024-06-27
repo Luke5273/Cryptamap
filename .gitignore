@@ -5,6 +5,7 @@
 
 # User-defined files
 *.ini
+vcpkg_installed
 
 # User-specific files
 *.rsuser

@@ -1,7 +1,0 @@
-C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/vcpkg/pkgs/glad_x64-windows/lib/glad.lib
-C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/vcpkg/pkgs/glad_x64-windows/include/glad/glad.h
-C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/vcpkg/pkgs/glad_x64-windows/include/KHR/khrplatform.h
-C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/vcpkg/pkgs/glad_x64-windows/lib/cmake/glad/gladConfig.cmake
-C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/vcpkg/pkgs/glad_x64-windows/lib/cmake/glad/gladConfigVersion.cmake
-C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/vcpkg/pkgs/glad_x64-windows/lib/cmake/glad/gladTargets.cmake
-C:/Users/azadr/dev/Cpp/Cryptamap/vcpkg_installed/vcpkg/pkgs/glad_x64-windows/lib/cmake/glad/gladTargets-release.cmake
