@@ -21,16 +21,16 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
     {
-        translate -= glm::vec2(0, yoffset / 12);
+        translate -= glm::vec2(0, (float)yoffset / 12);
         return;
     }
     else if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
     {
-        translate += glm::vec2(yoffset / 12, 0);
+        translate += glm::vec2((float)yoffset / 12, 0);
         return;
     }
 
-    float prospect = scale + yoffset/12;
+    float prospect = scale + (float)yoffset/12;
     scale = prospect >= 0 ? prospect : scale;
 }
 
@@ -133,7 +133,7 @@ int main(int, char**)
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    Shader shader = Shader("./test.vert", "./test.frag");
+    Shader shader = Shader("../shaders/test.vert", "../shaders/test.frag");
 
     /*const char* vertexSource = "#version 430 core\n"
                                 "layout (location = 0) in vec3 aPos;\n"

@@ -18,20 +18,20 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Cryptamap.cpp">
+    <ClCompile Include="src\Cryptamap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Shader.hpp">
+    <ClInclude Include="src\Shader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="test.frag">
+    <None Include="shaders\test.frag">
       <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="test.vert">
+    <None Include="shaders\test.vert">
       <Filter>Source Files\Shaders</Filter>
     </None>
   </ItemGroup>
