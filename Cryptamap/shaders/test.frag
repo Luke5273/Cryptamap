@@ -1,19 +1,8 @@
 #version 430 core
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
-out vec3 col;
+out vec4 FragColor;
+in vec3 col;
 
-uniform float scale;
-uniform vec2 translate;
-
-void main() 
+void main()
 {
-    vec2 pre = aPos.xy;
-    mat2 transform = mat2(
-        scale, 0,
-        0,     scale
-    );
-    vec2 post = transform * pre;
-    gl_Position = vec4(post.xy + translate, aPos.z, 1.0); 
-    col = aColor; 
-}                                                           
+    FragColor = vec4(col, 1.);
+}

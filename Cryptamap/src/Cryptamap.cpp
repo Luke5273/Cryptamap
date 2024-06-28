@@ -133,69 +133,7 @@ int main(int, char**)
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    Shader shader = Shader("../shaders/test.vert", "../shaders/test.frag");
-
-    /*const char* vertexSource = "#version 430 core\n"
-                                "layout (location = 0) in vec3 aPos;\n"
-                                "layout (location = 1) in vec3 aColor;\n"
-                                "out vec3 col;\n"
-                                "\n"
-                                "uniform float scale;\n"
-                                "uniform vec2 translate;\n"
-                                "\n"
-                                "void main() \n"
-                                "{\n"
-                                "    vec2 pre = aPos.xy;\n"
-                                "    mat2 transform = mat2(\n"
-                                "        scale, 0,\n"
-                                "        0,     scale\n"
-                                "    );\n"
-                                "    vec2 post = transform * pre;\n"
-                                "    gl_Position = vec4(post.xy + translate, aPos.z, 1.0);\n" 
-                                "    col = aColor;\n" 
-                                "}";
-    const char* fragmentSource = "#version 430 core\n"
-                                  "out vec4 FragColor;\n"
-                                  "in vec3 col;\n"
-                                  "\n"
-                                  "void main()\n"
-                                  "{\n"
-                                  "    FragColor = vec4(col, 1.);\n"
-                                  "}";
-
-    GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vertexSource, NULL);
-    glCompileShader(vertex);
-    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-    if(!success) 
-    {
-        glGetShaderInfoLog(vertex, sizeof(infoLog), NULL, infoLog);
-        std::cout << infoLog << std::endl;
-    }
-
-    GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fragmentSource, NULL);
-    glCompileShader(fragment);
-    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-        glGetShaderInfoLog(vertex, sizeof(infoLog), NULL, infoLog);
-        std::cout << infoLog << std::endl;
-    }
-
-    GLuint shader = glCreateProgram();
-    glAttachShader(shader, vertex);
-    glAttachShader(shader, fragment);
-    glLinkProgram(shader);
-    glGetProgramiv(shader, GL_LINK_STATUS, &success);
-    if(success)
-    {
-        glGetProgramInfoLog(shader, sizeof(infoLog), NULL, infoLog);
-        std::cout << infoLog << std::endl;
-    }
-
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);*/
+    Shader shader = Shader("./shaders/test.vert", "./shaders/test.frag");
 
     glfwSetScrollCallback(window, scroll_callback);
 

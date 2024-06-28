@@ -19,40 +19,42 @@ public:
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
-	const char* vertexCode;
-	const char* fragmentCode;
+	std::string vertexCode;
+	std::string fragmentCode;
 	std::ifstream vShaderFile;
 	std::ifstream fShaderFile;
-
-	vShaderFile.open(vertexPath);
-	if(!vShaderFile.is_open())
+	// ensure ifstream objects can throw exceptions:
+	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	try
 	{
-		std::cerr << "ERROR: VERTEX SHADER FILE NOT OPENED AT " << vertexPath << std::endl;
-		exit(1);
+		// open files
+		vShaderFile.open(vertexPath);
+		fShaderFile.open(fragmentPath);
+		std::stringstream vShaderStream, fShaderStream;
+		// read file's buffer contents into streams
+		vShaderStream << vShaderFile.rdbuf();
+		fShaderStream << fShaderFile.rdbuf();
+		// close file handlers
+		vShaderFile.close();
+		fShaderFile.close();
+		// convert stream into string
+		vertexCode = vShaderStream.str();
+		fragmentCode = fShaderStream.str();
 	}
-	fShaderFile.open(fragmentPath);
-	if(!fShaderFile.is_open())
+	catch(std::ifstream::failure e)
 	{
-		std::cerr << "ERROR: FRAGMENT SHADER FILE NOT OPENED AT " << fragmentPath << std::endl;
-		exit(1);
+		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
 	}
-
-	std::stringstream vertexStream;
-	vertexStream << vShaderFile.rdbuf();
-	vertexCode = vertexStream.str().c_str();
-	vShaderFile.close();
-
-	std::stringstream fragmentStream;
-	fragmentStream << fShaderFile.rdbuf();
-	fragmentCode = fragmentStream.str().c_str();
-	fShaderFile.close();
+	const char* vShaderCode = vertexCode.c_str();
+	const char* fShaderCode = fragmentCode.c_str();
 
 
 	int success;
 	char infoLog[1024];
 
 	GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertex, 1, &vertexCode, NULL);
+	glShaderSource(vertex, 1, &vShaderCode, NULL);
 	glCompileShader(vertex);
 	glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
 	if(!success)
@@ -62,7 +64,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	}
 
 	GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragment, 1, &fragmentCode, NULL);
+	glShaderSource(fragment, 1, &fShaderCode, NULL);
 	glCompileShader(fragment);
 	glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
 	if(!success)
