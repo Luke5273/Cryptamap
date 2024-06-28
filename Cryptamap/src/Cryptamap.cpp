@@ -34,6 +34,14 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     scale = prospect >= 0 ? prospect : scale;
 }
 
+int width = 1280;
+int height = 720;
+void window_size_callback(GLFWwindow* window, int newWidth, int newHeight)
+{
+    width = newWidth;
+    height = newHeight;
+}
+
 
 // Main code
 int main(int, char**)
@@ -86,7 +94,7 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Our state
-    ImVec4 clear_color = ImVec4(1.f, 1.f, 1.f, 1.00f);
+    ImVec4 clear_color = ImVec4(.2f, .2f, .2f, 1.00f);
 
     int32_t wHeight, wWidth; //window height and width
     glfwGetWindowSize(window, &wWidth, &wHeight);
@@ -101,10 +109,10 @@ int main(int, char**)
 
     float verts[] = {
         // positions               // colors           
-        kx,  ky, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
-        kx, -ky, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
-       -kx, -ky, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
-       -kx,  ky, 0.0f,   1.0f, 1.0f, 0.0f      // top left 
+        kx,  kx, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
+        kx, -kx, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
+       -kx, -kx, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
+       -kx,  kx, 0.0f,   1.0f, 1.0f, 0.0f      // top left 
     };
     uint32_t indices[] = {
         0, 1, 2,
@@ -136,6 +144,7 @@ int main(int, char**)
     Shader shader = Shader("./shaders/test.vert", "./shaders/test.frag");
 
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetWindowSizeCallback(window, window_size_callback);
 
     // Main loop
     while(!glfwWindowShouldClose(window))
@@ -177,6 +186,7 @@ int main(int, char**)
 
         shader.use();
         glUniform1f(glGetUniformLocation(shader.ID, "scale"), scale);
+        glUniform1f(glGetUniformLocation(shader.ID, "aspectRatio"), ((float)width / height)*(kx/ky));
         glUniform2f(glGetUniformLocation(shader.ID, "translate"), translate.x, translate.y);
 
         glBindVertexArray(VAO);
