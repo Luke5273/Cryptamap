@@ -19,18 +19,23 @@ float scale = 1;
 glm::vec2 translate = glm::vec2(0,0);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+    float fac = 12;
+    if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
+    {
+        fac = 60;
+    }
     if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
     {
-        translate -= glm::vec2(0, (float)yoffset / 12);
+        translate -= glm::vec2(0, (float)yoffset / fac);
         return;
     }
-    else if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
+    else if(glfwGetKey(window, GLFW_KEY_LEFT_ALT))
     {
-        translate += glm::vec2((float)yoffset / 12, 0);
+        translate += glm::vec2((float)yoffset / fac, 0);
         return;
     }
 
-    float prospect = scale + (float)yoffset/12;
+    float prospect = scale + (float)yoffset/fac;
     scale = prospect >= 0 ? prospect : scale;
 }
 
@@ -100,7 +105,7 @@ int main(int, char**)
     glfwGetWindowSize(window, &wWidth, &wHeight);
 
     float qHeight, qWidth; //quad height and width
-    qHeight = 20*70;
+    qHeight = 25*70;
     qWidth = 30*70;
 
     float kx, ky;
@@ -165,7 +170,7 @@ int main(int, char**)
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         
-        ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+        ImGui::Begin("Hello, world!", NULL, ImGuiWindowFlags_NoDecoration);                          // Create a window called "Hello, world!" and append into it.
 
         ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
           
@@ -173,6 +178,10 @@ int main(int, char**)
         ImGui::SliderFloat2("pos", &translate.x, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::End();
+
+        ImGui::Begin("Map");
+        ImGui::Text("This is a test");
         ImGui::End();
         
 
