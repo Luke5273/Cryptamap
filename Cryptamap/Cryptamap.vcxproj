@@ -137,8 +137,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Cryptamap.cpp" />
+    <ClCompile Include="src\Layer.cpp" />
+    <ClCompile Include="src\Model.cpp" />
+    <ClInclude Include="src\Model.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Layer.hpp" />
     <ClInclude Include="src\Shader.hpp" />
   </ItemGroup>
   <ItemGroup>

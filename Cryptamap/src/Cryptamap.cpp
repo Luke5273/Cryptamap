@@ -1,14 +1,18 @@
+#pragma once
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include <stdio.h>
-#include <iostream>
 #define GL_SILENCE_DEPRECATION
 #include <glad/glad.h>
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 #include <glm/glm.hpp>
 
+#include <stdio.h>
+#include <iostream>
+
 #include "Shader.hpp"
+#include "Model.hpp"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -104,7 +108,7 @@ int main(int, char**)
     int32_t wHeight, wWidth; //window height and width
     glfwGetWindowSize(window, &wWidth, &wHeight);
 
-    float qHeight, qWidth; //quad height and width
+    int32_t qHeight, qWidth; //quad height and width
     qHeight = 25*70;
     qWidth = 30*70;
 
@@ -148,6 +152,18 @@ int main(int, char**)
 
     Shader shader = Shader("./shaders/test.vert", "./shaders/test.frag");
 
+    /*GLuint outTex; 
+    {
+        glGenTextures(1, &outTex);
+        glBindTexture(GL_TEXTURE_2D, outTex);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glTexImage2D(outTex, 0, GL_RGBA, qWidth, qHeight, NULL, GL_RGBA, GL_FLOAT, NULL);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }*/
+
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetWindowSizeCallback(window, window_size_callback);
 
@@ -166,7 +182,7 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        //ImGui::ShowDemoWindow();
+        ImGui::ShowDemoWindow();
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         
@@ -180,8 +196,21 @@ int main(int, char**)
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
         ImGui::End();
 
-        ImGui::Begin("Map");
+        ImGui::Begin("Layers");
         ImGui::Text("This is a test");
+       
+        if(ImGui::CollapsingHeader("Layer 1", ImGuiTreeNodeFlags_None))
+        {
+            ImGui::Text("Layer 1");
+        }
+        if(ImGui::CollapsingHeader("Layer 2", ImGuiTreeNodeFlags_None))
+        {
+            ImGui::Text("Layer 2");
+        }
+        if(ImGui::CollapsingHeader("Layer 3", ImGuiTreeNodeFlags_None))
+        {
+            ImGui::Text("Layer 3");
+        }
         ImGui::End();
         
 
