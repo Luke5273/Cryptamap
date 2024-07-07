@@ -1,6 +1,7 @@
 #pragma once
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #define GL_SILENCE_DEPRECATION
@@ -13,6 +14,8 @@
 
 #include "Shader.hpp"
 #include "Model.hpp"
+
+auto model = Model::getInstance();
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -51,6 +54,33 @@ void window_size_callback(GLFWwindow* window, int newWidth, int newHeight)
     height = newHeight;
 }
 
+struct InputTextCallback_UserData
+{
+    std::string* Str;
+    ImGuiInputTextCallback  ChainCallback;
+    void* ChainCallbackUserData;
+};
+
+int InputTextCallback(ImGuiInputTextCallbackData* data)
+{
+    InputTextCallback_UserData* user_data = (InputTextCallback_UserData*)data->UserData;
+    if(data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+    {
+        // Resize string callback
+        // If for some reason we refuse the new length (BufTextLen) and/or capacity (BufSize) we need to set them back to what we want.
+        std::string* str = user_data->Str;
+        IM_ASSERT(data->Buf == str->c_str());
+        str->resize(data->BufTextLen);
+        data->Buf = (char*)str->c_str();
+    }
+    else if(user_data->ChainCallback)
+    {
+        // Forward to user callback, if any
+        data->UserData = user_data->ChainCallbackUserData;
+        return user_data->ChainCallback(data);
+    }
+    return 0;
+}
 
 // Main code
 int main(int, char**)
@@ -197,21 +227,37 @@ int main(int, char**)
         ImGui::End();
 
         ImGui::Begin("Layers");
-        ImGui::Text("This is a test");
-       
-        if(ImGui::CollapsingHeader("Layer 1", ImGuiTreeNodeFlags_None))
+        if(ImGui::Button("+"))
         {
-            ImGui::Text("Layer 1");
-        }
-        if(ImGui::CollapsingHeader("Layer 2", ImGuiTreeNodeFlags_None))
+            model->addLayer();
+        }ImGui::SameLine();
+        if(ImGui::Button("-"))
         {
-            ImGui::Text("Layer 2");
+            model->delLayer();
         }
-        if(ImGui::CollapsingHeader("Layer 3", ImGuiTreeNodeFlags_None))
+        
+        //for(auto& layer : model->layers)
+        for(int i = 0; i < model->layers.size(); i++)
         {
-            ImGui::Text("Layer 3");
+            auto& layer = model->layers[i];
+            ImGui::PushID(i);
+            if(ImGui::CollapsingHeader(layer.name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                if(ImGui::InputTextWithHint("##", layer.name.c_str(), &layer.inputText, ImGuiInputTextFlags_EnterReturnsTrue))
+                {
+                    if(!layer.inputText[0])
+                    {
+                        layer.name.assign("##");
+                    }
+                    else
+                    {
+                        layer.name.assign(layer.inputText.c_str());
+                    }
+                }       
+            }
+            ImGui::PopID();
         }
-        ImGui::End();
+        ImGui::End();   
         
 
         // Rendering
