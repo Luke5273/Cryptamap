@@ -186,22 +186,36 @@ int main(int, char**)
 
     Shader shader = Shader("./shaders/test.vert", "./shaders/test.frag");
     
-    int imgW, imgH;
+    /*int imgW, imgH;
     unsigned char* data = stbi_load("container.jpg", &imgW, &imgH, NULL, 3);
     if(data == NULL)
     {
         std::cerr << "Image not loaded" << std::endl;
-    }
+    }*/
+    GLuint FBO;
+    glGenFramebuffers(1, &FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
     GLuint outTex; 
     glGenTextures(1, &outTex);
     glBindTexture(GL_TEXTURE_2D, outTex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, qWidth, qHeight, NULL, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, outTex, 0);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgW, imgH, NULL, GL_RGB, GL_UNSIGNED_BYTE, data);
-    stbi_image_free(data);
+    auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "Framebuffer error: " << fboStatus << std::endl;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    glClearColor(1.f, 0.f, 0.f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    //stbi_image_free(data);
 
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetWindowSizeCallback(window, window_size_callback);
@@ -237,8 +251,8 @@ int main(int, char**)
 
         ImGui::Begin("Image");
         ImGui::Text("pointer = %x", outTex);
-        ImGui::Text("size = %d x %d", imgW, imgH);
-        ImGui::Image((void*)(intptr_t)outTex, ImVec2(imgW, imgH));
+        ImGui::Text("size = %d x %d", 512, 512);
+        ImGui::Image((void*)(intptr_t)outTex, ImVec2(512, 512));
         ImGui::End();
 
         LayerList::draw();   
