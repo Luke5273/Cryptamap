@@ -14,6 +14,10 @@
 
 #include "Shader.hpp"
 #include "Model.hpp"
+#include "widgets/LayerList.hpp"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 auto model = Model::getInstance();
 
@@ -181,18 +185,23 @@ int main(int, char**)
     glEnableVertexAttribArray(1);
 
     Shader shader = Shader("./shaders/test.vert", "./shaders/test.frag");
-
-    /*GLuint outTex; 
+    
+    int imgW, imgH;
+    unsigned char* data = stbi_load("container.jpg", &imgW, &imgH, NULL, 3);
+    if(data == NULL)
     {
-        glGenTextures(1, &outTex);
-        glBindTexture(GL_TEXTURE_2D, outTex);
+        std::cerr << "Image not loaded" << std::endl;
+    }
+    GLuint outTex; 
+    glGenTextures(1, &outTex);
+    glBindTexture(GL_TEXTURE_2D, outTex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glTexImage2D(outTex, 0, GL_RGBA, qWidth, qHeight, NULL, GL_RGBA, GL_FLOAT, NULL);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }*/
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgW, imgH, NULL, GL_RGB, GL_UNSIGNED_BYTE, data);
+    stbi_image_free(data);
 
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetWindowSizeCallback(window, window_size_callback);
@@ -216,7 +225,7 @@ int main(int, char**)
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         
-        ImGui::Begin("Hello, world!", NULL, ImGuiWindowFlags_NoDecoration);                          // Create a window called "Hello, world!" and append into it.
+        ImGui::Begin("Hello, world!", NULL); //ImGuiWindowFlags_NoDecoration                          // Create a window called "Hello, world!" and append into it.
 
         ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
           
@@ -226,39 +235,13 @@ int main(int, char**)
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
         ImGui::End();
 
-        ImGui::Begin("Layers");
-        if(ImGui::Button("+"))
-        {
-            model->addLayer();
-        }ImGui::SameLine();
-        if(ImGui::Button("-"))
-        {
-            model->delLayer();
-        }
-        
-        //for(auto& layer : model->layers)
-        for(int i = 0; i < model->layers.size(); i++)
-        {
-            auto& layer = model->layers[i];
-            ImGui::PushID(i);
-            if(ImGui::CollapsingHeader(layer.name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-            {
-                if(ImGui::InputTextWithHint("##", layer.name.c_str(), &layer.inputText, ImGuiInputTextFlags_EnterReturnsTrue))
-                {
-                    if(!layer.inputText[0])
-                    {
-                        layer.name.assign("##");
-                    }
-                    else
-                    {
-                        layer.name.assign(layer.inputText.c_str());
-                    }
-                }       
-            }
-            ImGui::PopID();
-        }
-        ImGui::End();   
-        
+        ImGui::Begin("Image");
+        ImGui::Text("pointer = %x", outTex);
+        ImGui::Text("size = %d x %d", imgW, imgH);
+        ImGui::Image((void*)(intptr_t)outTex, ImVec2(imgW, imgH));
+        ImGui::End();
+
+        LayerList::draw();   
 
         // Rendering
         ImGui::Render();
@@ -272,7 +255,7 @@ int main(int, char**)
         glUniform1f(glGetUniformLocation(shader.ID, "scale"), scale);
         glUniform1f(glGetUniformLocation(shader.ID, "aspectRatio"), ((float)width / height)*(kx/ky));
         glUniform2f(glGetUniformLocation(shader.ID, "translate"), translate.x, translate.y);
-
+        
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

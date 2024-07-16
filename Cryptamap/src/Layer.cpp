@@ -1,6 +1,8 @@
 #pragma once
 #include "Model.hpp"
 #include "Layer.hpp"
+#include "imgui.h"
+#include "imgui_stdlib.h"
 
 #include <string>
 #include <format>
