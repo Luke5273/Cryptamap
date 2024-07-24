@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <cmath>
 
 #include "Shader.hpp"
 #include "Model.hpp"
@@ -143,7 +144,7 @@ int main(int, char**)
     glfwGetWindowSize(window, &wWidth, &wHeight);
 
     int32_t qHeight, qWidth; //quad height and width
-    qHeight = 25*70;
+    qHeight = 20*70;
     qWidth = 30*70;
 
     float kx, ky;
@@ -152,10 +153,10 @@ int main(int, char**)
 
     float verts[] = {
         // positions               // colors           
-        kx,  kx, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
-        kx, -kx, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
-       -kx, -kx, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
-       -kx,  kx, 0.0f,   1.0f, 1.0f, 0.0f      // top left 
+        1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
+        1.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
+       -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
+       -1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f      // top left 
     };
     uint32_t indices[] = {
         0, 1, 2,
@@ -249,29 +250,40 @@ int main(int, char**)
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
         ImGui::End();
 
+        //ImGui::Begin("Image", NULL, ImGuiWindowFlags_NoDecoration);
         ImGui::Begin("Image");
-        ImGui::Text("pointer = %x", outTex);
-        ImGui::Text("size = %d x %d", 512, 512);
-        ImGui::Image((void*)(intptr_t)outTex, ImVec2(512, 512));
+        int sizeX = (int)std::floor(ImGui::GetItemRectSize().x);
+        int sizeY = (int)((float)qHeight/qWidth * sizeX);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+        glViewport(0, 0, qWidth, qHeight);
+        glClearColor(clear_color.x* clear_color.w, clear_color.y* clear_color.w, clear_color.z* clear_color.w, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        shader.use();
+        glUniform1f(glGetUniformLocation(shader.ID, "scale"), scale);
+        glUniform2f(glGetUniformLocation(shader.ID, "translate"), translate.x, translate.y);
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        ImGui::Image((void*)(intptr_t)outTex, ImVec2(sizeX, sizeY));
         ImGui::End();
 
         LayerList::draw();   
 
         // Rendering
         ImGui::Render();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
-
-        shader.use();
-        glUniform1f(glGetUniformLocation(shader.ID, "scale"), scale);
-        glUniform1f(glGetUniformLocation(shader.ID, "aspectRatio"), ((float)width / height)*(kx/ky));
-        glUniform2f(glGetUniformLocation(shader.ID, "translate"), translate.x, translate.y);
-        
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
