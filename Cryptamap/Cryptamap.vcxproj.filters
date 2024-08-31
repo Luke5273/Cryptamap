@@ -52,6 +52,9 @@
     <None Include="shaders\test.frag">
       <Filter>Source Files\Shaders</Filter>
     </None>
+    <None Include="scratchpad.md">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\Downloads\container.jpg">

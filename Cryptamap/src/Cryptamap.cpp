@@ -235,6 +235,7 @@ int main(int, char**)
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
         ImGui::ShowDemoWindow();
 
@@ -250,10 +251,8 @@ int main(int, char**)
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
         ImGui::End();
 
-        //ImGui::Begin("Image", NULL, ImGuiWindowFlags_NoDecoration);
-        ImGui::Begin("Image");
-        int sizeX = (int)std::floor(ImGui::GetItemRectSize().x);
-        int sizeY = (int)((float)qHeight/qWidth * sizeX);
+        ImGui::Begin("Image", NULL, ImGuiWindowFlags_NoDecoration);
+        //ImGui::Begin("Image");
 
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -270,7 +269,7 @@ int main(int, char**)
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        ImGui::Image((void*)(intptr_t)outTex, ImVec2(sizeX, sizeY));
+        ImGui::Image((void*)(intptr_t)outTex, ImVec2(width, height));
         ImGui::End();
 
         LayerList::draw();   
