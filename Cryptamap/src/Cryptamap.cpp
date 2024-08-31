@@ -147,10 +147,6 @@ int main(int, char**)
     qHeight = 20*70;
     qWidth = 30*70;
 
-    float kx, ky;
-    kx = (float)qWidth / wWidth;
-    ky = (float)qHeight / wHeight;
-
     float verts[] = {
         // positions               // colors           
         1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
@@ -240,37 +236,40 @@ int main(int, char**)
         ImGui::ShowDemoWindow();
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-        
-        ImGui::Begin("Hello, world!", NULL); //ImGuiWindowFlags_NoDecoration                          // Create a window called "Hello, world!" and append into it.
+        {
+            ImGui::Begin("Hello, world!", NULL); //ImGuiWindowFlags_NoDecoration                          // Create a window called "Hello, world!" and append into it.
 
-        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-          
-        ImGui::SliderFloat("scale", &scale, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-        ImGui::SliderFloat2("pos", &translate.x, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::End();
+            ImGui::SliderFloat("scale", &scale, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat2("pos", &translate.x, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 
-        ImGui::Begin("Image", NULL, ImGuiWindowFlags_NoDecoration);
-        //ImGui::Begin("Image");
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            ImGui::End();
+        }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+        {
+            ImGui::Begin("Image", NULL, ImGuiWindowFlags_NoDecoration);
+            //ImGui::Begin("Image");
 
-        glViewport(0, 0, qWidth, qHeight);
-        glClearColor(clear_color.x* clear_color.w, clear_color.y* clear_color.w, clear_color.z* clear_color.w, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT);
+            glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-        shader.use();
-        glUniform1f(glGetUniformLocation(shader.ID, "scale"), scale);
-        glUniform2f(glGetUniformLocation(shader.ID, "translate"), translate.x, translate.y);
+            glViewport(0, 0, qWidth, qHeight);
+            glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            shader.use();
+            glUniform1f(glGetUniformLocation(shader.ID, "scale"), scale);
+            glUniform2f(glGetUniformLocation(shader.ID, "translate"), translate.x, translate.y);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glBindVertexArray(VAO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        ImGui::Image((void*)(intptr_t)outTex, ImVec2(width, height));
-        ImGui::End();
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            ImGui::Image((void*)(intptr_t)outTex, ImVec2(width, width*qHeight/qWidth));
+            ImGui::End();
+        }
 
         LayerList::draw();   
 
