@@ -31,24 +31,32 @@ float scale = 1;
 glm::vec2 translate = glm::vec2(0,0);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    float fac = 12;
-    if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
-    {
-        fac = 60;
-    }
-    if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
-    {
-        translate -= glm::vec2(0, (float)yoffset / fac);
-        return;
-    }
-    else if(glfwGetKey(window, GLFW_KEY_LEFT_ALT))
-    {
-        translate += glm::vec2((float)yoffset / fac, 0);
-        return;
-    }
+    // (1) ALWAYS forward mouse data to ImGui! This is automatic with default backends. With your own backend:
+    ImGuiIO& io = ImGui::GetIO();
+    //io.AddMouseWheelEvent(xoffset, yoffset);
 
-    float prospect = scale + (float)yoffset/fac;
-    scale = prospect >= 0 ? prospect : scale;
+    // (2) ONLY forward mouse data to your underlying app/game.
+    if(!io.WantCaptureMouse)
+    {
+        float fac = 12;
+        if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
+        {
+            fac = 60;
+        }
+        if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
+        {
+            translate -= glm::vec2(0, (float)yoffset / fac);
+            return;
+        }
+        else if(glfwGetKey(window, GLFW_KEY_LEFT_ALT))
+        {
+            translate += glm::vec2((float)yoffset / fac, 0);
+            return;
+        }
+
+        float prospect = scale + (float)yoffset/fac;
+        scale = prospect >= 0 ? prospect : scale;
+    }
 }
 
 int width = 1280;
@@ -182,13 +190,7 @@ int main(int, char**)
     glEnableVertexAttribArray(1);
 
     Shader shader = Shader("./shaders/test.vert", "./shaders/test.frag");
-    
-    /*int imgW, imgH;
-    unsigned char* data = stbi_load("container.jpg", &imgW, &imgH, NULL, 3);
-    if(data == NULL)
-    {
-        std::cerr << "Image not loaded" << std::endl;
-    }*/
+   
     GLuint FBO;
     glGenFramebuffers(1, &FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
@@ -214,7 +216,6 @@ int main(int, char**)
 
     //stbi_image_free(data);
 
-    glfwSetScrollCallback(window, scroll_callback);
     glfwSetWindowSizeCallback(window, window_size_callback);
 
     // Main loop
@@ -248,9 +249,44 @@ int main(int, char**)
             ImGui::End();
         }
 
-        {
+        //map
+        { 
             ImGui::Begin("Image", NULL, ImGuiWindowFlags_NoDecoration);
-            //ImGui::Begin("Image");
+
+            ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+            ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+            vMin.x += ImGui::GetWindowPos().x;
+            vMin.y += ImGui::GetWindowPos().y;
+            vMax.x += ImGui::GetWindowPos().x;
+            vMax.y += ImGui::GetWindowPos().y;
+            ImVec2 widgetSize = ImVec2(vMax.x - vMin.x, vMax.y - vMin.y);
+
+            if(io.MouseWheel && ImGui::IsWindowHovered())
+            {
+                bool shouldScale = true;
+
+                float fac = 12;
+                if(ImGui::IsKeyDown(ImGuiKey_LeftShift))
+                {
+                    fac = 60;
+                }
+                if(ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+                {
+                    translate -= glm::vec2(0, (float)io.MouseWheel / fac);
+                    shouldScale = false;
+                }
+                else if(ImGui::IsKeyDown(ImGuiKey_LeftAlt))
+                {
+                    translate += glm::vec2((float)io.MouseWheel / fac, 0);
+                    shouldScale = false;
+                }
+
+                if(shouldScale)
+                {
+                    float prospect = scale + (float)io.MouseWheel / fac;
+                    scale = prospect >= 0 ? prospect : scale;
+                }
+            }
 
             glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -261,13 +297,15 @@ int main(int, char**)
             shader.use();
             glUniform1f(glGetUniformLocation(shader.ID, "scale"), scale);
             glUniform2f(glGetUniformLocation(shader.ID, "translate"), translate.x, translate.y);
+            glUniform1f(glGetUniformLocation(shader.ID, "aspectRatio"), widgetSize.x/widgetSize.y * (float)qHeight/qWidth);
 
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                
+            ImGui::Image((void*)(intptr_t)outTex, widgetSize);
 
-            ImGui::Image((void*)(intptr_t)outTex, ImVec2(width, width*qHeight/qWidth));
             ImGui::End();
         }
 

@@ -5,10 +5,12 @@ out vec3 col;
 
 uniform float scale;
 uniform vec2 translate;
+uniform float aspectRatio;
 
 void main() 
 {
-    vec2 pos = aPos.xy * scale;
+    mat2 aspectRatio = {{scale, 0}, {0, aspectRatio * scale}};
+    vec2 pos = aspectRatio * aPos.xy;
     gl_Position = vec4(pos + translate, aPos.z, 1.0); 
     col = aColor; 
 }                                                           
