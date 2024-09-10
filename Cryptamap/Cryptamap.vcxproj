@@ -140,11 +140,9 @@
     <ClCompile Include="src\Cryptamap.cpp" />
     <ClCompile Include="src\Layer.cpp" />
     <ClCompile Include="src\Model.cpp" />
-    <ClCompile Include="View.cpp" />
     <ClInclude Include="src\Model.hpp" />
     <ClInclude Include="src\stb_image.h" />
     <ClInclude Include="src\widgets\LayerList.hpp" />
-    <ClInclude Include="View.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Layer.hpp" />

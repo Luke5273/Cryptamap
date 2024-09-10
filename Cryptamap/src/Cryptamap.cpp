@@ -27,45 +27,9 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
+// add to view
 float scale = 1;
 glm::vec2 translate = glm::vec2(0,0);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    // (1) ALWAYS forward mouse data to ImGui! This is automatic with default backends. With your own backend:
-    ImGuiIO& io = ImGui::GetIO();
-    //io.AddMouseWheelEvent(xoffset, yoffset);
-
-    // (2) ONLY forward mouse data to your underlying app/game.
-    if(!io.WantCaptureMouse)
-    {
-        float fac = 12;
-        if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
-        {
-            fac = 60;
-        }
-        if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
-        {
-            translate -= glm::vec2(0, (float)yoffset / fac);
-            return;
-        }
-        else if(glfwGetKey(window, GLFW_KEY_LEFT_ALT))
-        {
-            translate += glm::vec2((float)yoffset / fac, 0);
-            return;
-        }
-
-        float prospect = scale + (float)yoffset/fac;
-        scale = prospect >= 0 ? prospect : scale;
-    }
-}
-
-int width = 1280;
-int height = 720;
-void window_size_callback(GLFWwindow* window, int newWidth, int newHeight)
-{
-    width = newWidth;
-    height = newHeight;
-}
 
 struct InputTextCallback_UserData
 {
@@ -153,9 +117,6 @@ int main(int, char**)
 
 
     auto model = Model::getInstance();
-    int32_t qHeight, qWidth; //quad height and width
-    qHeight = model->height * model->dpi;
-    qWidth = model->width * model->dpi;
 
     float verts[] = {
         // positions               // colors           
@@ -200,7 +161,7 @@ int main(int, char**)
     GLuint outTex; 
     glGenTextures(1, &outTex);
     glBindTexture(GL_TEXTURE_2D, outTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, qWidth, qHeight, NULL, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, model->MapData.pixWidth, model->MapData.pixHeight, NULL, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
@@ -218,7 +179,7 @@ int main(int, char**)
 
     //stbi_image_free(data);
 
-    glfwSetWindowSizeCallback(window, window_size_callback);
+    //glfwSetWindowSizeCallback(window, window_size_callback);
 
     // Main loop
     while(!glfwWindowShouldClose(window))
@@ -292,14 +253,14 @@ int main(int, char**)
 
             glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-            glViewport(0, 0, qWidth, qHeight);
+            glViewport(0, 0, model->MapData.pixWidth, model->MapData.pixHeight);
             glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
             glClear(GL_COLOR_BUFFER_BIT);
 
             shader.use();
             glUniform1f(glGetUniformLocation(shader.ID, "scale"), scale);
             glUniform2f(glGetUniformLocation(shader.ID, "translate"), translate.x, translate.y);
-            glUniform1f(glGetUniformLocation(shader.ID, "aspectRatio"), widgetSize.x/widgetSize.y * (float)qHeight/qWidth);
+            glUniform1f(glGetUniformLocation(shader.ID, "aspectRatio"), widgetSize.x/widgetSize.y * (float)model->MapData.height/ model->MapData.width);
 
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

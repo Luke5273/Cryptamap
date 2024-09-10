@@ -16,9 +16,14 @@ public:
 	void delLayer();
 	void delLayer(int loc);
 
-	int32_t width = 30;
-	int32_t height = 20;
-	int32_t dpi = 70;
+
+	struct _MapData {
+		int32_t width = 30;
+		int32_t height = 20;
+		int32_t dpi = 70;
+		int32_t pixWidth = width*dpi;
+		int32_t pixHeight = height*dpi;
+	} MapData;
 
 private: 
 	static Model* m_self;
