@@ -16,6 +16,10 @@ public:
 	void delLayer();
 	void delLayer(int loc);
 
+	int32_t width = 30;
+	int32_t height = 20;
+	int32_t dpi = 70;
+
 private: 
 	static Model* m_self;
 };

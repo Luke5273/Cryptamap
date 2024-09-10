@@ -151,9 +151,11 @@ int main(int, char**)
     int32_t wHeight, wWidth; //window height and width
     glfwGetWindowSize(window, &wWidth, &wHeight);
 
+
+    auto model = Model::getInstance();
     int32_t qHeight, qWidth; //quad height and width
-    qHeight = 20*70;
-    qWidth = 30*70;
+    qHeight = model->height * model->dpi;
+    qWidth = model->width * model->dpi;
 
     float verts[] = {
         // positions               // colors           
