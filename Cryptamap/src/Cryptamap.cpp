@@ -15,180 +15,21 @@
 
 #include "Shader.hpp"
 #include "Model.hpp"
+#include "View.hpp"
 #include "widgets/LayerList.hpp"
+#include "Callbacks.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 auto model = Model::getInstance();
 
-static void glfw_error_callback(int error, const char* description)
-{
-    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-}
-
-// add to view
-float scale = 1;
-glm::vec2 translate = glm::vec2(0,0);
-
-struct InputTextCallback_UserData
-{
-    std::string* Str;
-    ImGuiInputTextCallback  ChainCallback;
-    void* ChainCallbackUserData;
-};
-
-int InputTextCallback(ImGuiInputTextCallbackData* data)
-{
-    InputTextCallback_UserData* user_data = (InputTextCallback_UserData*)data->UserData;
-    if(data->EventFlag == ImGuiInputTextFlags_CallbackResize)
-    {
-        // Resize string callback
-        // If for some reason we refuse the new length (BufTextLen) and/or capacity (BufSize) we need to set them back to what we want.
-        std::string* str = user_data->Str;
-        IM_ASSERT(data->Buf == str->c_str());
-        str->resize(data->BufTextLen);
-        data->Buf = (char*)str->c_str();
-    }
-    else if(user_data->ChainCallback)
-    {
-        // Forward to user callback, if any
-        data->UserData = user_data->ChainCallbackUserData;
-        return user_data->ChainCallback(data);
-    }
-    return 0;
-}
-
 // Main code
 int main(int, char**)
 {
-    glfwSetErrorCallback(glfw_error_callback);
-    if (!glfwInit())
-        return 1;
-
-    const char* glsl_version = "#version 430";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
-    if (window == nullptr)
-        return 1;
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); 
-
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cout << "Failed to initialize OpenGL context" << std::endl;
-        return -1;
-    }
-
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-    //io.ConfigViewportsNoAutoMerge = true;
-    //io.ConfigViewportsNoTaskBarIcon = true;
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
-
-    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-    ImGuiStyle& style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    auto view = View::getInstance(); // sets up all the opengl imgui stuff
+    while(!glfwWindowShouldClose(view->window))
     {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
-
-    // Our state
-    ImVec4 clear_color = ImVec4(.2f, .2f, .2f, 1.00f);
-
-    int32_t wHeight, wWidth; //window height and width
-    glfwGetWindowSize(window, &wWidth, &wHeight);
-
-
-    auto model = Model::getInstance();
-
-    float verts[] = {
-        // positions               // colors           
-        1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
-        1.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
-       -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
-       -1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f      // top left 
-    };
-    uint32_t indices[] = {
-        0, 1, 2,
-        0, 2, 3
-    };
-
-    uint32_t VBO;
-    uint32_t VAO;
-    uint32_t EBO;
-
-    glGenBuffers(1, &VBO);
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // aPos
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // aColor
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    Shader shader = Shader("./shaders/test.vert", "./shaders/test.frag");
-   
-    GLuint FBO;
-    glGenFramebuffers(1, &FBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
-    GLuint outTex; 
-    glGenTextures(1, &outTex);
-    glBindTexture(GL_TEXTURE_2D, outTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, model->MapData.pixWidth, model->MapData.pixHeight, NULL, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, outTex, 0);
-
-    auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "Framebuffer error: " << fboStatus << std::endl;
-
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-    glClearColor(1.f, 0.f, 0.f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //stbi_image_free(data);
-
-    //glfwSetWindowSizeCallback(window, window_size_callback);
-
-    // Main loop
-    while(!glfwWindowShouldClose(window))
-    {
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
 
         // Start the Dear ImGui frame
@@ -205,72 +46,15 @@ int main(int, char**)
 
             ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 
-            ImGui::SliderFloat("scale", &scale, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::SliderFloat2("pos", &translate.x, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat("scale", &view->transforms.scale, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat2("pos", &view->transforms.translate.x, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat2("pos", &view->transforms.translate.x, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
         }
 
-        //map
-        { 
-            ImGui::Begin("Image", NULL, ImGuiWindowFlags_NoDecoration);
-
-            ImVec2 vMin = ImGui::GetWindowContentRegionMin();
-            ImVec2 vMax = ImGui::GetWindowContentRegionMax();
-            vMin.x += ImGui::GetWindowPos().x;
-            vMin.y += ImGui::GetWindowPos().y;
-            vMax.x += ImGui::GetWindowPos().x;
-            vMax.y += ImGui::GetWindowPos().y;
-            ImVec2 widgetSize = ImVec2(vMax.x - vMin.x, vMax.y - vMin.y);
-
-            if(io.MouseWheel && ImGui::IsWindowHovered())
-            {
-                bool shouldScale = true;
-
-                float fac = 12;
-                if(ImGui::IsKeyDown(ImGuiKey_LeftShift))
-                {
-                    fac = 60;
-                }
-                if(ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
-                {
-                    translate -= glm::vec2(0, (float)io.MouseWheel / fac);
-                    shouldScale = false;
-                }
-                else if(ImGui::IsKeyDown(ImGuiKey_LeftAlt))
-                {
-                    translate += glm::vec2((float)io.MouseWheel / fac, 0);
-                    shouldScale = false;
-                }
-
-                if(shouldScale)
-                {
-                    float prospect = scale + (float)io.MouseWheel / fac;
-                    scale = prospect >= 0 ? prospect : scale;
-                }
-            }
-
-            glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
-            glViewport(0, 0, model->MapData.pixWidth, model->MapData.pixHeight);
-            glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            shader.use();
-            glUniform1f(glGetUniformLocation(shader.ID, "scale"), scale);
-            glUniform2f(glGetUniformLocation(shader.ID, "translate"), translate.x, translate.y);
-            glUniform1f(glGetUniformLocation(shader.ID, "aspectRatio"), widgetSize.x/widgetSize.y * (float)model->MapData.height/ model->MapData.width);
-
-            glBindVertexArray(VAO);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                
-            ImGui::Image((void*)(intptr_t)outTex, widgetSize);
-
-            ImGui::End();
-        }
+        view->renderMap();
 
         LayerList::draw();   
 
@@ -279,8 +63,9 @@ int main(int, char**)
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glfwGetFramebufferSize(view->window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
+        ImVec4 clear_color = view->style.bgColour;
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -289,6 +74,7 @@ int main(int, char**)
         // Update and Render additional Platform Windows
         // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
         //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             GLFWwindow* backup_current_context = glfwGetCurrentContext();
@@ -298,7 +84,7 @@ int main(int, char**)
         }
         
 
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(view->window);
     }
 
     // Cleanup
@@ -306,7 +92,7 @@ int main(int, char**)
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(view->window);
     glfwTerminate();
 
     return 0;

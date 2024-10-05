@@ -111,7 +111,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);GLFW_INCLUDE_NONE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
@@ -126,7 +126,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);GLFW_INCLUDE_NONE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -139,9 +139,15 @@
   <ItemGroup>
     <ClCompile Include="src\Cryptamap.cpp" />
     <ClCompile Include="src\Layer.cpp" />
+    <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\View.cpp" />
+    <ClInclude Include="src\Callbacks.hpp" />
+    <ClInclude Include="src\Map.hpp" />
     <ClInclude Include="src\Model.hpp" />
     <ClInclude Include="src\stb_image.h" />
+    <ClInclude Include="src\View.hpp" />
     <ClInclude Include="src\widgets\LayerList.hpp" />
   </ItemGroup>
   <ItemGroup>

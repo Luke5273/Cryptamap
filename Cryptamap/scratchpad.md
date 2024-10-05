@@ -3,7 +3,7 @@
 # Currently working on
 - Add grid overlay
 - Refactor rendering to own file
-- Make view class, and move all rendering to that
+	- mostly done
 
 # Next on the list
 - Nagivation using mouse not just keyboard

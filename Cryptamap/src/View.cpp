@@ -1,13 +1,11 @@
 #pragma once
 #include "View.hpp"
 #include "Model.hpp"
+#include "Map.hpp"
+#include "Callbacks.hpp"
 
 #include "iostream"
 
-#include "imgui.h"
-#include "imgui_stdlib.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 #define GL_SILENCE_DEPRECATION
 #include <glad/glad.h>
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
@@ -21,6 +19,7 @@ View* View::getInstance()
 	if(m_self == nullptr)
 	{
 		m_self = new View;
+        m_self->init();
 	}
 	return m_self;
 }
@@ -34,22 +33,22 @@ void View::init()
 {
     glfwSetErrorCallback(glfw_error_callback);
     if(!glfwInit())
-        return 1;
+        exit(1);
 
     const char* glsl_version = "#version 430";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+    window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
     if(window == nullptr)
-        return 1;
+        exit(1);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
     if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize OpenGL context" << std::endl;
-        return -1;
+        exit(1);
     }
 
     // Setup Dear ImGui context
@@ -82,75 +81,69 @@ void View::init()
     // Our state
     ImVec4 clear_color = ImVec4(.2f, .2f, .2f, 1.00f);
 
-    int32_t wHeight, wWidth; //window height and width
-    glfwGetWindowSize(window, &wWidth, &wHeight);
+    //auto model = Model::getInstance();
 
+    map = Map::getInstance();
 
-    auto model = Model::getInstance();
-    int32_t qHeight, qWidth; //quad height and width
-    qHeight = model->height * model->dpi;
-    qWidth = model->width * model->dpi;
-
-    float verts[] = {
-        // positions               // colors           
-        1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
-        1.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
-       -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
-       -1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f      // top left 
-    };
-    uint32_t indices[] = {
-        0, 1, 2,
-        0, 2, 3
-    };
-
-    uint32_t VBO;
-    uint32_t VAO;
-    uint32_t EBO;
-
-    glGenBuffers(1, &VBO);
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // aPos
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // aColor
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    Shader shader = Shader("./shaders/test.vert", "./shaders/test.frag");
-
-    GLuint FBO;
-    glGenFramebuffers(1, &FBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
-    GLuint outTex;
-    glGenTextures(1, &outTex);
-    glBindTexture(GL_TEXTURE_2D, outTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, qWidth, qHeight, NULL, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, outTex, 0);
-
-    auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "Framebuffer error: " << fboStatus << std::endl;
-
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-    glClearColor(1.f, 0.f, 0.f, 1.f);
+    glBindFramebuffer(GL_FRAMEBUFFER, map->FBO);
+    glClearColor(1.f, 0.f, 0.f, 1.f); //red, to see if rendering doesnt work
     glClear(GL_COLOR_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
 
-    //stbi_image_free(data);
+void View::renderMap()
+{
+    ImGui::Begin("Image", NULL, ImGuiWindowFlags_NoDecoration);
 
-    glfwSetWindowSizeCallback(window, window_size_callback);
+    ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+    ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+    vMin.x += ImGui::GetWindowPos().x;
+    vMin.y += ImGui::GetWindowPos().y;
+    vMax.x += ImGui::GetWindowPos().x;
+    vMax.y += ImGui::GetWindowPos().y;
+    ImVec2 widgetSize = ImVec2(vMax.x - vMin.x, vMax.y - vMin.y);
+
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    if(io.MouseWheel && ImGui::IsWindowHovered())
+    {
+        bool shouldScale = true;
+
+        float fac = 12;
+        if(ImGui::IsKeyDown(ImGuiKey_LeftShift))
+        {
+            fac = 60;
+        }
+        if(ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+        {
+            transforms.translate -= glm::vec2(0, (float)io.MouseWheel / fac);
+            shouldScale = false;
+        }
+        else if(ImGui::IsKeyDown(ImGuiKey_LeftAlt))
+        {
+            transforms.translate += glm::vec2((float)io.MouseWheel / fac, 0);
+            shouldScale = false;
+        }
+
+        if(shouldScale)
+        {
+            float prospect = transforms.scale + (float)io.MouseWheel / fac;
+            transforms.scale = prospect >= 0 ? prospect : transforms.scale;
+        }
+    }
+
+    map->render(widgetSize.x / widgetSize.y);
+
+    ImGui::Image((void*)(intptr_t)map->outTex, widgetSize);
+
+    ImGui::End();
+}
+
+void View::clean()
+{
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }
