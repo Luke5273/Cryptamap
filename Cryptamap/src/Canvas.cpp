@@ -1,5 +1,5 @@
 #pragma once
-#include "Map.hpp"
+#include "Canvas.hpp"
 #include "Shader.hpp"
 #include <iostream>
 #include <memory>
@@ -7,36 +7,35 @@
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 #include <glm/glm.hpp>
 
-Map* Map::m_self = nullptr;
+//Canvas* Canvas::m_self = nullptr;
+//
+//Canvas* Canvas::getInstance()
+//{
+//    if(m_self == nullptr)
+//    {
+//        m_self = new Canvas;
+//    }
+//    return m_self;
+//}
 
-Map* Map::getInstance(const char* vertPath, const char* fragPath)
-{
-    if(m_self == nullptr)
-    {
-        m_self = new Map(vertPath, fragPath);
-        //m_self = new Map("./shaders/test.vert", "./shaders/test.frag");
-    }
-    return m_self;
-}
-
-float Map::verts[24] = {
-    // positions         // colors           
-    1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
-    1.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
-   -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
-   -1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f       // top left 
+float Canvas::verts[12] = {
+    // positions         
+    1.0f,  1.0f, 0.0f,  // top right
+    1.0f, -1.0f, 0.0f,  // bottom right
+   -1.0f, -1.0f, 0.0f,  // bottom left
+   -1.0f,  1.0f, 0.0f,  // top left 
 };
 
-uint32_t Map::indices[6] = {
+uint32_t Canvas::indices[6] = {
     0, 1, 2,
     0, 2, 3
 };
 
-Map::Map(const char* vertPath, const char* fragPath)
+Canvas::Canvas()
 {
     model = Model::getInstance();
     view = View::getInstance();
-    shader = std::make_unique<Shader>(vertPath, fragPath);
+    shader = std::make_unique<Shader>("./shaders/test.vert", "./shaders/test.frag");
     glGenBuffers(1, &VBO);
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &EBO);
@@ -49,11 +48,8 @@ Map::Map(const char* vertPath, const char* fragPath)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // aPos
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // aColor
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
     glGenFramebuffers(1, &FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
@@ -72,20 +68,20 @@ Map::Map(const char* vertPath, const char* fragPath)
         std::cout << "Framebuffer error: " << fboStatus << std::endl;
 }
 
-Map::~Map()
-{
-    delete m_self;
-}
+//Canvas::~Canvas()
+//{
+//    delete m_self;
+//}
 
-uint32_t Map::render(float widgetAspectRatio)
+uint32_t Canvas::render(float widgetAspectRatio)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
     glViewport(0, 0, model->MapData.pixWidth, model->MapData.pixHeight);
     glClearColor(view->style.bgColour.x * view->style.bgColour.w,
-                 view->style.bgColour.y * view->style.bgColour.w, 
-                 view->style.bgColour.z * view->style.bgColour.w, 
-                 view->style.bgColour.w
+        view->style.bgColour.y * view->style.bgColour.w,
+        view->style.bgColour.z * view->style.bgColour.w,
+        view->style.bgColour.w
     );
     glClear(GL_COLOR_BUFFER_BIT);
 

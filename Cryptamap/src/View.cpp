@@ -83,7 +83,7 @@ void View::init()
 
     //auto model = Model::getInstance();
 
-    map = Map::getInstance();
+    map = Map::getInstance("./shaders/test.vert", "./shaders/test.frag");
 
     glBindFramebuffer(GL_FRAMEBUFFER, map->FBO);
     glClearColor(1.f, 0.f, 0.f, 1.f); //red, to see if rendering doesnt work

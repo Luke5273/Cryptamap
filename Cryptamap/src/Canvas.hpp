@@ -8,20 +8,20 @@ class Model;
 class View;
 class Shader;
 
-class Map
+class Canvas
 {
 public:
-    Map(const char* vertPath, const char* fragPath);
-    ~Map();
-    Map(const Map& obj) = delete;
-    static Map* getInstance(const char* vertPath, const char* fragPath);
-    static Map* m_self;
+    Canvas();
+    virtual ~Canvas() {};
+    Canvas(const Canvas& obj) = delete;
+    //static Canvas* getInstance();
+    //static Canvas* m_self;
 
     uint32_t render(float widgetAspectRatio);
 
-    Model* model; 
+    Model* model;
     View* view;
-    static float verts[24];
+    static float verts[12];
     static uint32_t indices[6];
 
     uint32_t VBO;
