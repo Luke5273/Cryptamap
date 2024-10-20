@@ -2,6 +2,7 @@
 #include "View.hpp"
 #include "Model.hpp"
 #include "Map.hpp"
+#include "Overlay.hpp"
 #include "Callbacks.hpp"
 
 #include "iostream"
@@ -131,7 +132,7 @@ void View::renderMap()
         }
     }
 
-    map->render(widgetSize.x / widgetSize.y);
+    map->render(widgetSize.x/widgetSize.y);
 
     ImGui::Image((void*)(intptr_t)map->outTex, widgetSize);
 

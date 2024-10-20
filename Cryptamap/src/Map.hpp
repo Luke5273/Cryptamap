@@ -7,6 +7,7 @@
 class Model;
 class View;
 class Shader;
+class Overlay;
 
 class Map
 {
@@ -21,7 +22,9 @@ public:
 
     Model* model; 
     View* view;
-    static float verts[24];
+    Overlay* overlay = nullptr;
+
+    static float verts[12];
     static uint32_t indices[6];
 
     uint32_t VBO;

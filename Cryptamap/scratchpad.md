@@ -1,7 +1,7 @@
 # Bugs to fix
 
 # Currently working on
-- Add grid overlay
+- Readd resize callback, aspect ratio is messed up
 - Refactor rendering to own file
 	- mostly done
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "Map.hpp"
+#include "Overlay.hpp"
 #include "Shader.hpp"
 #include <iostream>
 #include <memory>
@@ -19,12 +20,12 @@ Map* Map::getInstance(const char* vertPath, const char* fragPath)
     return m_self;
 }
 
-float Map::verts[24] = {
-    // positions         // colors           
-    1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,      // top right
-    1.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,      // bottom right
-   -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,      // bottom left
-   -1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f       // top left 
+float Map::verts[12] = {
+    // positions         
+    1.0f,  1.0f, 0.0f,   // top right
+    1.0f, -1.0f, 0.0f,   // bottom right
+   -1.0f, -1.0f, 0.0f,   // bottom left
+   -1.0f,  1.0f, 0.0f,   // top left 
 };
 
 uint32_t Map::indices[6] = {
@@ -36,6 +37,8 @@ Map::Map(const char* vertPath, const char* fragPath)
 {
     model = Model::getInstance();
     view = View::getInstance();
+    overlay = Overlay::getInstance("./shaders/test.vert", "./shaders/overlay.frag");
+
     shader = std::make_unique<Shader>(vertPath, fragPath);
     glGenBuffers(1, &VBO);
     glGenVertexArrays(1, &VAO);
@@ -49,11 +52,8 @@ Map::Map(const char* vertPath, const char* fragPath)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // aPos
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // aColor
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
     glGenFramebuffers(1, &FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
@@ -93,9 +93,13 @@ uint32_t Map::render(float widgetAspectRatio)
     glUniform1f(glGetUniformLocation(shader->ID, "scale"), view->transforms.scale);
     glUniform2f(glGetUniformLocation(shader->ID, "translate"), view->transforms.translate.x, view->transforms.translate.y);
     glUniform1f(glGetUniformLocation(shader->ID, "aspectRatio"), widgetAspectRatio * (float)model->MapData.height / model->MapData.width);
+    glUniform2i(glGetUniformLocation(shader->ID, "boxSize"), model->MapData.width, model->MapData.height);
+    glUniform2i(glGetUniformLocation(shader->ID, "mapSize"), model->MapData.pixWidth, model->MapData.pixHeight);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    overlay->render(FBO, widgetAspectRatio);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

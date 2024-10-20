@@ -141,11 +141,13 @@
     <ClCompile Include="src\Layer.cpp" />
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\Overlay.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\View.cpp" />
     <ClInclude Include="src\Callbacks.hpp" />
     <ClInclude Include="src\Map.hpp" />
     <ClInclude Include="src\Model.hpp" />
+    <ClInclude Include="src\Overlay.hpp" />
     <ClInclude Include="src\stb_image.h" />
     <ClInclude Include="src\View.hpp" />
     <ClInclude Include="src\widgets\LayerList.hpp" />
@@ -156,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="scratchpad.md" />
+    <None Include="shaders\overlay.frag" />
     <None Include="shaders\test.vert" />
     <None Include="shaders\test.frag" />
   </ItemGroup>

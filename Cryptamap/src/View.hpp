@@ -31,7 +31,7 @@ public:
 	} transforms;
 
 	struct _style {
-		ImVec4 bgColour = ImVec4(.2f, .2f, .2f, 1.0f);
+		ImVec4 bgColour = ImVec4(.2f, .2f, .4f, 1.0f);
 	} style;
 
 	Map* map = nullptr;
