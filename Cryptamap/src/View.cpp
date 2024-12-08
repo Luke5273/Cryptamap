@@ -4,6 +4,7 @@
 #include "Map.hpp"
 #include "Overlay.hpp"
 #include "Callbacks.hpp"
+#include "widgets/LayerList.hpp"
 
 #include "iostream"
 
@@ -27,6 +28,7 @@ View* View::getInstance()
 
 View::~View()
 {
+    clean();
 	delete m_self;
 }
 
@@ -90,6 +92,73 @@ void View::init()
     glClearColor(1.f, 0.f, 0.f, 1.f); //red, to see if rendering doesnt work
     glClear(GL_COLOR_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void View::run()
+{
+    while(!glfwWindowShouldClose(window))
+    {
+        update();
+    }
+}
+
+void View::update()
+{
+    glfwPollEvents();
+
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
+    ImGui::ShowDemoWindow();
+
+    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+    {
+        ImGui::Begin("Hello, world!", NULL); //ImGuiWindowFlags_NoDecoration                          // Create a window called "Hello, world!" and append into it.
+
+        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+
+        ImGui::SliderFloat("scale",&transforms.scale, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+        ImGui::SliderFloat2("pos", &transforms.translate.x, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+        ImGui::SliderFloat2("pos", &transforms.translate.x, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+        //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::End();
+    }
+
+    renderMap();
+
+    LayerList::draw();
+
+    // Rendering
+    ImGui::Render();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    int display_w, display_h;
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    ImVec4 clear_color = style.bgColour;
+    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    // Update and Render additional Platform Windows
+    // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+    //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    if(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        GLFWwindow* backup_current_context = glfwGetCurrentContext();
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        glfwMakeContextCurrent(backup_current_context);
+    }
+
+
+    glfwSwapBuffers(window);
 }
 
 void View::renderMap()

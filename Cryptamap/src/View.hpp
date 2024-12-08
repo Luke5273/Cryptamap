@@ -22,6 +22,8 @@ public:
 	Model* model = Model::getInstance();
 
 	void init();
+	void run();
+	void update();
 	void renderMap();
 	void clean();
 
