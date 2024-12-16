@@ -74,7 +74,7 @@ Overlay::~Overlay()
     delete m_self;
 }
 
-void Overlay::render(GLuint FBO, float widgetAspectRatio)
+void Overlay::render(GLuint FBO, float widgetWidth)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -84,12 +84,12 @@ void Overlay::render(GLuint FBO, float widgetAspectRatio)
         view->style.bgColour.z * view->style.bgColour.w,
         view->style.bgColour.w
     );
-    //glClear(GL_COLOR_BUFFER_BIT);
 
     shader->use();
     glUniform1f(glGetUniformLocation(shader->ID, "scale"), view->transforms.scale);
     glUniform2f(glGetUniformLocation(shader->ID, "translate"), view->transforms.translate.x, view->transforms.translate.y);
-    glUniform1f(glGetUniformLocation(shader->ID, "aspectRatio"), widgetAspectRatio * (float)model->MapData.height / model->MapData.width);
+    glUniform1f(glGetUniformLocation(shader->ID, "widgetWidth"), widgetWidth);
+    std::cout << widgetWidth << "\n";
     glUniform2i(glGetUniformLocation(shader->ID, "boxSize"), model->MapData.width, model->MapData.height);
     glUniform2i(glGetUniformLocation(shader->ID, "mapSize"), model->MapData.pixWidth, model->MapData.pixHeight);
 

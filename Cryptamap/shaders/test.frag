@@ -25,8 +25,9 @@ bool compare(vec2 a, vec2 b, vec2 epsilon)
 
 void main()
 {
-    //float x = fract(fragPos.x * boxSize.x);
-    //float y = fract(fragPos.y * boxSize.y);
-    //vec3 col = compare(vec2(x,y), vec2(0.5f), vec2(0.45f)*min(sqrt(scale),1)) ? vec3(1.f) : vec3(0.f);
-    FragColor = vec4(0.f, 1.f, 0.f, 1.f);
+    float x = floor(fragPos.x * boxSize.x);
+    float y = floor(fragPos.y * boxSize.y);
+    float z = floor(x+y);
+    vec3 col = vec3(hash11(x),hash11(y),hash11(z));
+    FragColor = vec4(col, 1.f);
 }

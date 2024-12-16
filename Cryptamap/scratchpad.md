@@ -1,7 +1,7 @@
 # Bugs to fix
 
 # Currently working on
-- Readd resize callback, aspect ratio is messed up
+- getting the overlay to be pixel not size dependant
 
 # Next on the list
 - Map class becomes basically a renderer composed of canvases
@@ -12,3 +12,4 @@
 	- Done with imgui io, actually much easier this way
 
 # Further roadmap and feature ideas
+- Encapsulate view and model objects to Application class

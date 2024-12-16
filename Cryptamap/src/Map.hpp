@@ -18,7 +18,7 @@ public:
     static Map* getInstance(const char* vertPath, const char* fragPath);
     static Map* m_self;
 
-    uint32_t render(float widgetAspectRatio);
+    uint32_t render(float widgetAspectRatio, float widgetWidth);
 
     Model* model; 
     View* view;

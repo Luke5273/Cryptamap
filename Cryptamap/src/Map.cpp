@@ -77,7 +77,7 @@ Map::~Map()
     delete m_self;
 }
 
-uint32_t Map::render(float widgetAspectRatio)
+uint32_t Map::render(float widgetAspectRatio, float widgetWidth)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -99,7 +99,7 @@ uint32_t Map::render(float widgetAspectRatio)
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-    overlay->render(FBO, widgetAspectRatio);
+    overlay->render(FBO, widgetWidth);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

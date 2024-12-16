@@ -17,7 +17,7 @@ public:
     static Overlay* getInstance(const char* vertPath, const char* fragPath);
     static Overlay* m_self;
 
-    void render(uint32_t FBO, float widgetAspectRatio);
+    void render(uint32_t FBO, float widgetWidth);
 
     Model* model;
     View* view;

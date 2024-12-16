@@ -26,7 +26,7 @@ auto model = Model::getInstance();
 // Main code
 int main(int, char**)
 {
-    std::cout << model->MapData.height << "\n";
+    //std::cout << model->MapData.height << "\n";
     auto view = View::getInstance(); // sets up all the opengl imgui stuff
 
     view->run();

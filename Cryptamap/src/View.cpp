@@ -201,7 +201,7 @@ void View::renderMap()
         }
     }
 
-    map->render(widgetSize.x/widgetSize.y);
+    map->render(widgetSize.x/widgetSize.y, widgetSize.x);
 
     ImGui::Image((void*)(intptr_t)map->outTex, widgetSize);
 

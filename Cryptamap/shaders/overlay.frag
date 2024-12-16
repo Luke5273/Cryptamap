@@ -7,7 +7,7 @@ uniform ivec2 boxSize;
 uniform ivec2 mapSize;
 uniform float scale;
 uniform vec2 translate;
-uniform float aspectRatio;
+uniform float widgetWidth;
 
 bool compare(vec2 a, vec2 b, vec2 epsilon)
 {
@@ -20,16 +20,13 @@ bool compare(vec2 a, vec2 b, vec2 epsilon)
 
 void main()
 {
-    vec2 coord = gl_FragCoord.xy/mapSize - translate/2;
-    coord = vec2(coord.x,coord.y/aspectRatio);
-    //float x = fract(fragPos.x * boxSize.x);
+    vec2 coord = fragPos * mat2(1.f, 0.f, 0.f, float(mapSize.x)/mapSize.x);
     float x = fract(coord.x * boxSize.x);
-    //float y = fract(fragPos.y * boxSize.y);
-    float y = fract(coord.y/aspectRatio * boxSize.y);
-    if(compare(vec2(x,y), vec2(0.5f), vec2(0.45))) 
+    float y = fract(coord.y * boxSize.y);
+    if(compare(vec2(x,y), vec2(0.5f), vec2(0.45)*widgetWidth/500.f)) 
     {
         discard;
     }
-    vec4 col = vec4(vec3(0.f), 1.f);
-    FragColor = vec4(col);
+    vec3 col = vec3(0.f);
+    FragColor = vec4(col, 1.f);
 }
